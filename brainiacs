@@ -1,0 +1,110 @@
+import React, { useState, useMemo } from 'react';
+import { initializeApp } from "firebase/app";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, setDoc, deleteDoc } from "firebase/firestore";
+import { 
+  Users, UserPlus, Plus, Trophy, ChevronLeft, 
+  Settings, Star, Award, TrendingUp, History, 
+  Trash2, Edit2, X, Check, Search,
+  UserCheck, Video, FileText, MessageCircle, HeartHandshake, Clock, Medal, Zap, Brain, LogOut, Lock
+} from 'lucide-react';
+import { 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, 
+  Tooltip, ResponsiveContainer, Area, AreaChart 
+} from 'recharts';
+
+// --- FIREBASE CONFIG (Use suas variáveis do .env no projeto final!) ---
+const firebaseConfig = {
+  apiKey: "AIzaSyBB0NL-YEBLclVyNXFOgUv2XOE2FytXk-E",
+  authDomain: "futura-ce75c.firebaseapp.com",
+  projectId: "futura-ce75c",
+  storageBucket: "futura-ce75c.firebasestorage.app",
+  messagingSenderId: "4984728995",
+  appId: "1:4984728995:web:32978b92caa1ee8d49be16"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Mascote
+const MASCOT_URL = "/mr brain brainiacs.png";
+
+// --- MAIN APP ---
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [showLogin, setShowLogin] = useState(false);
+
+  // Auth State
+  React.useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      setShowLogin(false);
+    } catch (err) {
+      alert("Erro ao logar: verifique seu e-mail e senha.");
+    }
+  };
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-purple-600 font-bold">Carregando Brainiacs...</div>;
+
+  return (
+    <div className="min-h-screen bg-gray-50/50 font-sans">
+      {/* TOPBAR */}
+      <div className="bg-gradient-to-r from-purple-900 to-indigo-900 text-white py-3 px-6 shadow-md z-10 flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <img src={MASCOT_URL} alt="Mascot" className="w-10 h-10 object-contain" />
+          <div className="font-extrabold tracking-widest uppercase flex items-center gap-2 text-sm text-purple-100">
+            <Brain size={20} className="text-purple-300" /> Editora Futura
+          </div>
+        </div>
+        {!user && (
+          <button 
+            onClick={() => setShowLogin(!showLogin)} 
+            className="text-xs font-bold bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 transition-colors"
+          >
+            {showLogin ? 'Fechar' : 'Modo Admin'}
+          </button>
+        )}
+        {user && (
+          <button onClick={() => signOut(auth)} className="text-xs bg-red-900/50 px-3 py-1.5 rounded-lg hover:bg-red-900 transition-colors">
+            <LogOut size={16} />
+          </button>
+        )}
+      </div>
+
+      {showLogin && !user && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm">
+             <img src={MASCOT_URL} alt="Mascot" className="w-32 h-32 mx-auto mb-4" />
+             <h2 className="text-center text-xl font-bold mb-6">Brainiacs Admin</h2>
+             <form onSubmit={handleLogin} className="space-y-4">
+              <input type="email" placeholder="E-mail" className="w-full p-3 rounded-xl border border-gray-200" onChange={(e) => setEmail(e.target.value)} />
+              <input type="password" placeholder="Senha" className="w-full p-3 rounded-xl border border-gray-200" onChange={(e) => setPassword(e.target.value)} />
+              <button type="submit" className="w-full p-3 bg-purple-600 text-white font-bold rounded-xl">Entrar</button>
+             </form>
+          </div>
+        </div>
+      )}
+
+      <main className="p-6">
+         {/* O restante do seu app de turmas viria aqui... */}
+         <div className="max-w-2xl mx-auto text-center mt-20">
+            <h1 className="text-4xl font-bold text-gray-800">Bem-vindo ao Brainiacs!</h1>
+            <p className="text-gray-500 mt-4">Sistema de gamificação para suas aulas.</p>
+         </div>
+      </main>
+    </div>
+  );
+}

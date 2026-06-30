@@ -8,69 +8,149 @@
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
 <body class="bg-gray-50">
     <div id="root"></div>
 
     <script type="text/babel">
-        const firebaseConfig = {
-            apiKey: "AIzaSyBB0NL-YEBLclVyNXFOgUv2XOE2FytXk-E",
-            authDomain: "futura-ce75c.firebaseapp.com",
-            projectId: "futura-ce75c",
-            storageBucket: "futura-ce75c.firebasestorage.app",
-            messagingSenderId: "4984728995",
-            appId: "1:4984728995:web:32978b92caa1ee8d49be16"
-        };
+        const { useState, useMemo } = React;
+        const { Users, UserPlus, Plus, Trophy, ChevronLeft, Settings, Star, Award, TrendingUp, History, Trash2, Edit2, X, Check, Search, UserCheck, Video, FileText, MessageCircle, HeartHandshake, Clock, Medal, Zap, Brain } = lucide;
+        const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } = Recharts;
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+        const INITIAL_CLASSES = [
+            { id: 'c1', name: 'TURMA 01_A1', color: 'from-purple-400 to-indigo-500' },
+            { id: 'c2', name: 'TURMA 02_01', color: 'from-fuchsia-400 to-purple-600' },
+            { id: 'c3', name: 'TURMA C1', color: 'from-violet-400 to-fuchsia-500' },
+            { id: 'c4', name: 'TURMA B1', color: 'from-indigo-400 to-purple-500' },
+        ];
+
+        const INITIAL_ACTIONS = [
+            { id: 'a1', label: 'Participou da aula', points: 5, icon: UserCheck },
+            { id: 'a2', label: 'Câmera aberta', points: 3, icon: Video },
+            { id: 'a3', label: 'Fez o homework', points: 10, icon: FileText },
+            { id: 'a4', label: 'Respondeu perguntas', points: 5, icon: MessageCircle },
+            { id: 'a5', label: 'Ajudou um colega', points: 5, icon: HeartHandshake },
+            { id: 'a6', label: 'Excelente participação', points: 10, icon: Star },
+            { id: 'a7', label: 'Chegou no horário', points: 2, icon: Clock },
+        ];
+
+        const generateId = () => Math.random().toString(36).substr(2, 9);
+
+        const INITIAL_STUDENTS = [
+            { id: generateId(), classId: 'c1', name: 'Carlos Henrique', points: 0, history: [] },
+            { id: generateId(), classId: 'c1', name: 'Daniela Mireille Monteiro', points: 0, history: [] },
+            { id: generateId(), classId: 'c1', name: 'Dayane Santos', points: 0, history: [] },
+            { id: generateId(), classId: 'c1', name: 'Edson Barbosa', points: 0, history: [] },
+            { id: generateId(), classId: 'c1', name: 'Elizabeth Barros', points: 0, history: [] },
+            { id: generateId(), classId: 'c1', name: 'Gabriel Mendes', points: 0, history: [] },
+            { id: generateId(), classId: 'c1', name: 'Janaina Guedes', points: 0, history: [] },
+            { id: generateId(), classId: 'c1', name: 'Jonatan Felipe', points: 0, history: [] },
+            { id: generateId(), classId: 'c1', name: 'Maria Victoria Meneses', points: 0, history: [] },
+            { id: generateId(), classId: 'c1', name: 'Otoniel Peixoto', points: 0, history: [] },
+            { id: generateId(), classId: 'c1', name: 'Ranyelle Duarte', points: 0, history: [] },
+            { id: generateId(), classId: 'c1', name: 'Tallita Kauane', points: 0, history: [] },
+            { id: generateId(), classId: 'c2', name: 'Ana Freitas', points: 0, history: [] },
+            { id: generateId(), classId: 'c2', name: 'Christopher Justino', points: 0, history: [] },
+            { id: generateId(), classId: 'c2', name: 'Dhayane Victoria', points: 0, history: [] },
+            { id: generateId(), classId: 'c2', name: 'Gustavo Guerra', points: 0, history: [] },
+            { id: generateId(), classId: 'c2', name: 'Marcelo Xavier', points: 0, history: [] },
+            { id: generateId(), classId: 'c2', name: 'Marcia José', points: 0, history: [] },
+            { id: generateId(), classId: 'c2', name: 'Natali Martins', points: 0, history: [] },
+            { id: generateId(), classId: 'c2', name: 'Rodrigo José de Souza Santos', points: 0, history: [] },
+            { id: generateId(), classId: 'c2', name: 'Victoria Lima', points: 0, history: [] },
+            { id: generateId(), classId: 'c3', name: 'Amalie Marie de Lima Silva', points: 0, history: [] },
+            { id: generateId(), classId: 'c3', name: 'Anselmo Anegues do Nascimento', points: 0, history: [] },
+            { id: generateId(), classId: 'c3', name: 'Camila Rossi', points: 0, history: [] },
+            { id: generateId(), classId: 'c3', name: 'Greicielly Barbosa Maia', points: 0, history: [] },
+            { id: generateId(), classId: 'c3', name: 'Helena Araújo Carvalho', points: 0, history: [] },
+            { id: generateId(), classId: 'c3', name: 'José Barbosa da Silva Filho', points: 0, history: [] },
+            { id: generateId(), classId: 'c3', name: 'Jullya Fernanda', points: 0, history: [] },
+            { id: generateId(), classId: 'c3', name: 'Lucianara Bezerra', points: 0, history: [] },
+            { id: generateId(), classId: 'c3', name: 'Mathilde Borghese', points: 0, history: [] },
+            { id: generateId(), classId: 'c3', name: 'Pedro Henrique de Lima Pedroza', points: 0, history: [] },
+            { id: generateId(), classId: 'c3', name: 'Yasmin Emily', points: 0, history: [] },
+            { id: generateId(), classId: 'c4', name: 'Andreza Eulália', points: 0, history: [] },
+            { id: generateId(), classId: 'c4', name: 'Isabella Souza', points: 0, history: [] },
+            { id: generateId(), classId: 'c4', name: 'Jaqueline Moura', points: 0, history: [] },
+            { id: generateId(), classId: 'c4', name: 'Laysa Rebeca', points: 0, history: [] },
+            { id: generateId(), classId: 'c4', name: 'Maria Luisa Alves', points: 0, history: [] },
+            { id: generateId(), classId: 'c4', name: 'Milton de Souza', points: 0, history: [] },
+            { id: generateId(), classId: 'c4', name: 'Pedro Henrique', points: 0, history: [] }
+        ];
 
         function App() {
-            const [user, setUser] = React.useState(null);
-            const [alunos, setAlunos] = React.useState([]);
+            const [students, setStudents] = useState(INITIAL_STUDENTS);
+            const [currentView, setCurrentView] = useState('dashboard');
+            const [activeClassId, setActiveClassId] = useState(null);
+            const [activeStudentId, setActiveStudentId] = useState(null);
+            const [scoringStudent, setScoringStudent] = useState(null);
+            
+            // Note: Since this is local state, if you refresh the browser, points reset. 
+            // If you need to keep points, you'd need to use localStorage (I can add that if you want).
 
-            React.useEffect(() => {
-                auth.onAuthStateChanged(setUser);
-                const unsub = db.collection('alunos').onSnapshot(snap => {
-                    setAlunos(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-                });
-                return unsub;
-            }, []);
+            const activeClass = INITIAL_CLASSES.find(c => c.id === activeClassId);
+            const activeStudent = students.find(s => s.id === activeStudentId);
+            const classStudents = students.filter(s => s.classId === activeClassId).sort((a,b) => b.points - a.points);
+
+            const handleAddPoints = (studentId, points, reason) => {
+                setStudents(prev => prev.map(s => s.id === studentId ? {...s, points: s.points + points, history: [{id: generateId(), date: new Date().toISOString(), points, reason, totalAfter: s.points + points}, ...s.history]} : s));
+                setScoringStudent(null);
+            };
 
             return (
-                <div className="min-h-screen p-4 md:p-8">
-                    <header className="flex items-center justify-between mb-8 bg-white p-6 rounded-2xl shadow-sm">
-                        <div className="flex items-center gap-4">
-                            <img src="mr brain brainiacs.png" alt="Mascote" className="w-12 h-12" />
-                            <h1 className="text-2xl font-bold text-purple-900">Brainiacs</h1>
-                        </div>
-                        {user ? (
-                            <button onClick={() => auth.signOut()} className="text-red-500 text-sm">Sair do Admin</button>
-                        ) : (
-                            <span className="text-xs text-gray-400">Visualização Pública</span>
-                        )}
-                    </header>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {alunos.map(aluno => (
-                            <div key={aluno.id} className="bg-white p-6 rounded-2xl shadow-sm border border-purple-100">
-                                <h3 className="font-bold text-lg">{aluno.nome}</h3>
-                                <p className="text-purple-600 font-black text-2xl">{aluno.pontos || 0} Brains</p>
-                            </div>
-                        ))}
+                <div className="min-h-screen bg-gray-50">
+                    <div className="bg-purple-900 text-white p-4 text-center font-bold flex items-center justify-center gap-2">
+                        <img src="mr brain brainiacs.png" className="w-8 h-8" />
+                        Editora Futura - Brainiacs
                     </div>
+                    
+                    {currentView === 'dashboard' && (
+                        <div className="p-8 grid md:grid-cols-2 gap-6">
+                            {INITIAL_CLASSES.map(cls => (
+                                <button key={cls.id} onClick={() => { setActiveClassId(cls.id); setCurrentView('class'); }} className="bg-white p-6 rounded-2xl shadow border hover:shadow-lg transition">
+                                    <h2 className="text-2xl font-bold">{cls.name}</h2>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {currentView === 'class' && (
+                        <div className="p-8">
+                            <button onClick={() => setCurrentView('dashboard')} className="mb-4 text-purple-600 flex items-center"><ChevronLeft /> Voltar</button>
+                            {classStudents.map((s, idx) => (
+                                <div key={s.id} className="bg-white p-4 mb-2 rounded-lg flex justify-between">
+                                    <span>{idx + 1}º {s.name} - {s.points} Brains</span>
+                                    <button onClick={() => setScoringStudent(s)} className="bg-purple-500 text-white px-3 py-1 rounded">Dar Brains</button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {scoringStudent && (
+                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+                            <div className="bg-white p-8 rounded-2xl w-full max-w-lg">
+                                <h2 className="text-xl font-bold mb-4">Dar Brains para {scoringStudent.name}</h2>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {INITIAL_ACTIONS.map(a => (
+                                        <button key={a.id} onClick={() => handleAddPoints(scoringStudent.id, a.points, a.label)} className="bg-purple-50 p-4 rounded-xl text-sm font-bold">
+                                            {a.label} (+{a.points})
+                                        </button>
+                                    ))}
+                                </div>
+                                <button onClick={() => setScoringStudent(null)} className="mt-4 w-full bg-gray-200 py-2 rounded-xl">Fechar</button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
 </html>
